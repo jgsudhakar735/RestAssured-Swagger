@@ -1,4 +1,4 @@
-package com.mobeix.mx.mxadmin;
+package com.jgsudhakar.restassured;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.google.gson.Gson;
-import com.mobeix.mx.mxadmin.pojo.AutoMationDto;
-import com.mobeix.mx.mxadmin.pojo.Definitions;
-import com.mobeix.mx.mxadmin.pojo.Operation;
-import com.mobeix.mx.mxadmin.pojo.Properties;
-import com.mobeix.mx.mxadmin.pojo.Response;
+import com.jgsudhakar.restassured.pojo.AutoMationDto;
+import com.jgsudhakar.restassured.pojo.Definitions;
+import com.jgsudhakar.restassured.pojo.Properties;
+import com.jgsudhakar.restassured.pojo.Operation;
+import com.jgsudhakar.restassured.pojo.Response;
 
 public class AutoMationCodeGen {
 
@@ -32,12 +32,12 @@ public class AutoMationCodeGen {
 		System.out.println("Host ==>"+data.getHost());
 		System.out.println("Description ===> "+data.getInfo().getDescription());
 		
-		Map<String, com.mobeix.mx.mxadmin.pojo.Paths> path = data.getPaths();
+		Map<String, com.jgsudhakar.restassured.pojo.Paths> path = data.getPaths();
 		path.entrySet().forEach(entry -> {
 			
 //			System.out.println(entry.getKey());
 			
-			com.mobeix.mx.mxadmin.pojo.Paths paths = entry.getValue();
+			com.jgsudhakar.restassured.pojo.Paths paths = entry.getValue();
 			List<Operation> operations = paths.getOperations();
 			operations.forEach(operationData-> {
 				if(operationData.getTags().contains("IpTable Controller")) {

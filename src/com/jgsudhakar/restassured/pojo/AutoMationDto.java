@@ -1,4 +1,4 @@
-package com.mobeix.mx.mxadmin.pojo;
+package com.jgsudhakar.restassured.pojo;
 
 import java.util.ArrayList;
 import java.util.List;
