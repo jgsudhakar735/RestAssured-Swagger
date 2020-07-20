@@ -25,6 +25,10 @@ public class Properties {
 	private Schema items;
 	
 	private Xml xml;
-	
+
+	private String originalRef;
+
+	private String $ref;
+
 	
 }

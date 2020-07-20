@@ -12,4 +12,6 @@ public class Schema {
 	private String $ref;
 
 	private String originalRef;
+
+	private Items items;
 }

@@ -15,9 +15,11 @@ public class Parameter {
 
 	private String description;
 
-	private String required;
+	private boolean required;
 	
 	private String type;
 
 	private String format;
+
+	private Schema schema;
 }

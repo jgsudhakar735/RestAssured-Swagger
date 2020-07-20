@@ -48,7 +48,7 @@ public class AutoMationCodeGen2 {
 			operationData.getParameters().forEach(parameter -> {
 				System.out.println(parameter.getName());
 				System.out.println(parameter.getIn());
-				System.out.println(parameter.getRequired());
+				System.out.println(parameter.isRequired());
 				System.out.println(parameter.getType());
 				System.out.println(parameter.getFormat());
 				

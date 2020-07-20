@@ -1,4 +1,6 @@
 package com.jgsudhakar.restassured.junit;
+import io.restassured.http.Headers;
+import io.restassured.response.ResponseBody;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -24,6 +26,8 @@ public class TestMain {
  
         //Checks the Status Code
         int statusCode = response.getStatusCode();
+        ResponseBody  responseBody = response.getBody();
+        Headers headers = response.getHeaders();
         Assert.assertEquals(statusCode, 200);
 	 }
 	

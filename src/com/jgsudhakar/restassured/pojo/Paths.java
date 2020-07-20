@@ -42,24 +42,38 @@ public class Paths {
 	  {
 	    List<Operation> allOperations = new ArrayList<>();
 	    if (this.get != null) {
-	      allOperations.add(this.get);
+			Operation get = this.get;
+			get.setOperationType("GET");
+			allOperations.add(get);
 	    }
 	    if (this.put != null) {
-	      allOperations.add(this.put);
+			Operation get = this.put;
+			get.setOperationType("PUT");
+	       allOperations.add(this.put);
 	    }
 	    if (this.head != null) {
+			Operation get = this.head;
+			get.setOperationType("HEAD");
 	      allOperations.add(this.head);
 	    }
 	    if (this.post != null) {
+			Operation get = this.post;
+			get.setOperationType("POST");
 	      allOperations.add(this.post);
 	    }
 	    if (this.delete != null) {
+			Operation get = this.delete;
+			get.setOperationType("DELETE");
 	      allOperations.add(this.delete);
 	    }
 	    if (this.patch != null) {
+			Operation get = this.patch;
+			get.setOperationType("PATCH");
 	      allOperations.add(this.patch);
 	    }
 	    if (this.options != null) {
+			Operation get = this.options;
+			get.setOperationType("OPTIONS");
 	      allOperations.add(this.options);
 	    }
 	    return allOperations;

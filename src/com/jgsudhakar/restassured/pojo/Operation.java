@@ -40,4 +40,8 @@ public class Operation {
 	private ExternalDocs externalDocs;
 	
 	private Boolean deprecated;
+
+	private String operationType;
+
+	private String operationUrl;
 }
