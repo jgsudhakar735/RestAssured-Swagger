@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * @Author : Sudhakar Tangellapalli
+ * @File : com.jgsudhakar.restassured.pojo.Definitions
+ * @Date : 15/07/2020
+ */
 public class Definitions {
 	
 	private String definitions ="Definitions";

@@ -13,6 +13,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * @Author : Sudhakar Tangellapalli
+ * @File : com.jgsudhakar.restassured.pojo.Operation
+ * @Date : 15/07/2020
+ */
 public class Operation {
 	
 	private Map<String, Object> vendorExtensions = new LinkedHashMap<>();

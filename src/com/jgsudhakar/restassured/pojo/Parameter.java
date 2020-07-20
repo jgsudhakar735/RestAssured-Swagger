@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * @Author : Sudhakar Tangellapalli
+ * @File : com.jgsudhakar.restassured.pojo.Parameter
+ * @Date : 15/07/2020
+ */
 public class Parameter {
 
 	private String name;
