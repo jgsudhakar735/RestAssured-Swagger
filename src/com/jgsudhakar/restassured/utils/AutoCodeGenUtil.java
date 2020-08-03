@@ -3,6 +3,7 @@ package com.jgsudhakar.restassured.utils;
 import com.google.gson.Gson;
 import com.jgsudhakar.restassured.pojo.*;
 import org.testng.Assert;
+import org.testng.collections.CollectionUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -69,9 +70,10 @@ public class AutoCodeGenUtil {
      * This method will delete the old scripts which was generated from the location specified.
      * And this will create a new path in the same location to store the newly generated files.
      * */
-    public static void reInitilize(){
+    public static void reInitialize(){
         printData("Code Generating for Automation");
         printData("##############################");
+        printData("");
         String codePath = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\com\\jgsudhakar\\restassured\\junit\\generated\\";
 
         // Deleting Existing classed
@@ -82,7 +84,7 @@ public class AutoCodeGenUtil {
         printData("Creating Directory To Store Generated Files");
         createDirectoryIfNotExists(codePath);
         printData("Directory Created");
-
+        printData("");
     }
 
     /**
@@ -116,6 +118,9 @@ public class AutoCodeGenUtil {
      */
     public static void generateAutomationScript(String tagName, List<Operation> operations, Map<String, Definitions> definitions, String baseUrl, String path) throws IOException {
 
+        // Checking whether to generate the Negative test cases or not
+        String nagativeTestCaseGenerate = (String) RestAssuredConstants.getMiscValue("nagativeTestCaseGenerate");
+        boolean isNegativeTestCaseRequired = (null != nagativeTestCaseGenerate && !"".equalsIgnoreCase(nagativeTestCaseGenerate.trim()) && nagativeTestCaseGenerate.equalsIgnoreCase("Y"))? true : false;
         // creating the file and writing the content
         StringBuilder stringBuilder = new StringBuilder();
         String className = "";
@@ -138,11 +143,7 @@ public class AutoCodeGenUtil {
                 "import org.testng.Assert;\n" +
                 "import org.testng.annotations.Test;\n" +
                 "import com.jgsudhakar.restassured.junit.BaseTestClass;\n" +
-                "import io.restassured.RestAssured;\n" +
-                "import io.restassured.http.Method;\n" +
-                "import io.restassured.path.json.JsonPath;\n" +
                 "import io.restassured.response.Response;\n" +
-                "import io.restassured.specification.RequestSpecification;\n" +
                 "import java.util.HashMap;\n" +
                 "import java.util.Map;\n" +
                 "import io.restassured.response.Response;\n" +
@@ -156,60 +157,71 @@ public class AutoCodeGenUtil {
         stringBuilder.append("\r\n");
         operations.forEach(operationData -> {
 //            if(operationData.getTags().contains("Language Collection")) {
-                Map<String, Object> reqBody = new HashMap<>();
-                StringBuffer headerMapData = new StringBuffer();
-                StringBuffer reqMapData = new StringBuffer();
-                headerMapData.append("   Map<String, String> headerMap = new HashMap<>();\r\n");
-                reqMapData.append("   Map<String, Object> reqBody = new HashMap<>();\r\n");
-                operationData.getParameters().forEach(parameter -> {
-                    if (parameter.getIn().equals("header")) {
-                        Object headerValue = RestAssuredConstants.getHeaderValue(parameter.getName());
-                        if (parameter.isRequired()) {
+                    Map<String, Object> reqBody = new HashMap<>();
+                    Map<String, Object> reqBodyMap = new HashMap<>();
+                    StringBuffer headerMapData = new StringBuffer();
+                    StringBuffer reqMapData = new StringBuffer();
+                    StringBuffer pathParamData = new StringBuffer();
+                    StringBuffer queryParamData = new StringBuffer();
+                    headerMapData.append("   Map<String, String> headerMap = new HashMap<>();\r\n");
+                    reqMapData.append("   Map<String, Object> reqBody = new HashMap<>();\r\n");
+                    pathParamData.append("   Map<String, String> pathParam = new HashMap<>();\r\n");
+                    queryParamData.append("   Map<String, String> queryParam = new HashMap<>();\r\n");
+                    operationData.getParameters().forEach(parameter -> {
+                        if (parameter.getIn().equals("header")) {
+                            Object headerValue = RestAssuredConstants.getHeaderValue(parameter.getName());
                             headerMapData.append("   headerMap.put(" + '"' + parameter.getName() + '"' + ", " + '"' + headerValue + '"' + ");\r\n");
-                        } else
-                            headerMapData.append("   headerMap.put(" + '"' + parameter.getName() + '"' + ", " + '"' + headerValue + '"' + ");\r\n");
-                    } else if (parameter.getIn().equals("body")) {
-                        if (parameter.isRequired()) {
-                            String refName = (null != parameter.getSchema().getOriginalRef() ? parameter.getSchema().getOriginalRef() : parameter.getSchema().getItems().getOriginalRef());
-                            Definitions reqData = definitions.get(refName);
-                            List<String> requiData = reqData.getRequired();
-                            if (null == requiData)
-                                requiData = new ArrayList<>();
-                            List<String> requiredData = requiData;
-                            Map<String, Properties> properties = reqData.getProperties();
-                            properties.entrySet().forEach(reqBodyData -> {
-                                String key = reqBodyData.getKey();
-                                Properties value = reqBodyData.getValue();
-                                Object bodyValue = RestAssuredConstants.getBodyValue(key);
-                                if (requiredData.contains(key)) {
-                                    if (value.getType().equals("integer")) {
-                                        reqBody.put(key, 1);
-                                        reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
-                                    } else if (value.getType().equals("string")) {
-                                        reqBody.put(key, "DATA");
-                                        reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
-                                    } else {
-                                        reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
-                                    }
-                                } else {
-                                    // In Some Cases this Type will be null , Because there may be scenario where Array of Objects need to send
-                                    String type = value.getType();
-                                    if (null != type) {
-                                        if (type.equals("integer")) {
-                                            //											reqBody.put(key, );
+                        }else if (parameter.getIn().equals("path")) {
+                            Object pathValue = RestAssuredConstants.getPathValue(parameter.getName());
+                            pathParamData.append("   pathParam.put(" + '"' + parameter.getName() + '"' + ", " + '"' + pathValue + '"' + ");\r\n");
+                        } else if (parameter.getIn().equals("query")) {
+                            Object queryValue = RestAssuredConstants.getQueryValue(parameter.getName());
+                            queryParamData.append("   pathParam.put(" + '"' + parameter.getName() + '"' + ", " + '"' + queryValue + '"' + ");\r\n");
+                        } else if (parameter.getIn().equals("body")) {
+                            if (parameter.isRequired()) {
+                                String refName = (null != parameter.getSchema().getOriginalRef() ? parameter.getSchema().getOriginalRef() : parameter.getSchema().getItems().getOriginalRef());
+                                Definitions reqData = definitions.get(refName);
+                                List<String> requiData = reqData.getRequired();
+                                if (null == requiData)
+                                    requiData = new ArrayList<>();
+                                List<String> requiredData = requiData;
+                                Map<String, Properties> properties = reqData.getProperties();
+                                properties.entrySet().forEach(reqBodyData -> {
+                                    String key = reqBodyData.getKey();
+                                    Properties value = reqBodyData.getValue();
+                                    Object bodyValue = RestAssuredConstants.getBodyValue(key);
+                                    if (requiredData.contains(key)) {
+                                        if (value.getType().equals("integer")) {
+                                            reqBody.put(key, bodyValue);
+                                            reqBodyMap.put(key, bodyValue);
                                             reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
-                                        } else if (type.equals("string")) {
-                                            reqBody.put(key, "");
+                                        } else if (value.getType().equals("string")) {
+                                            reqBodyMap.put(key, bodyValue);
+                                            reqBody.put(key, bodyValue);
                                             reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
                                         } else {
+                                            reqBodyMap.put(key, bodyValue);
                                             reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
                                         }
                                     } else {
-                                        String objName = value.getOriginalRef();
-                                        Definitions refDef = definitions.get(objName);
-                                        List<String> refDefData = refDef.getRequired();
-                                        Map<String, Properties> propData = refDef.getProperties();
-                                        propData.forEach((k, v) -> {
+                                        // In Some Cases this Type will be null , Because there may be scenario where Array of Objects need to send
+                                        String type = value.getType();
+                                        if (null != type) {
+                                            if (type.equals("integer")) {
+                                                //	reqBody.put(key, );
+                                                reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
+                                            } else if (type.equals("string")) {
+                                                reqBody.put(key, "");
+                                                reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
+                                            } else {
+                                                reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
+                                            }
+                                        } else {
+                                            String objName = value.getOriginalRef();
+                                            Definitions refDef = definitions.get(objName);
+                                            List<String> refDefData = refDef.getRequired();
+                                            Map<String, Properties> propData = refDef.getProperties();
+                                            propData.forEach((k, v) -> {
 //										System.out.println("Key::>"+k);
 //										String typeData = v.getType();
 //										if(null != typeData && typeData.equalsIgnoreCase("object")){
@@ -225,30 +237,82 @@ public class AutoCodeGenUtil {
 //											reqMapData.append("   "+sBuff.toString());
 //											reqMapData.append("   reqBody.put(" + '"' + k + '"' + ", " + k + ");\r\n");
 //										}
-                                        });
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
 
-                });
-                // Genrating The Method
-                stringBuilder.append("\r\n");
-                stringBuilder.append(
-                        "@Test(groups=" + '"' + groupName + '"' + ")\r\n" +
-                                "  public void " + operationData.getOperationId() + "(){\r\n" +
-                                "    String url = " + '"' + baseUrl + '"' + ";\r\n" +
-                                headerMapData.toString() +
-                                "    headerMap.put(" + '"' + "Content-Type" + '"' + "," + '"' + (null != operationData.getConsumes() ? operationData.getConsumes().get(0) : "application/json") + '"' + ");\r\n" +
-                                reqMapData.toString() +
-                                "    Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url);\r\n" +
-                                "    int resStatusCode = response.getStatusCode();\r\n" +
-                                "    ResponseBody  responseBody = response.getBody();\r\n" +
-                                "    Headers headers = response.getHeaders();\r\n" +
-                                "    Assert.assertEquals(resStatusCode, 200);\r\n" +
-                                "}\r\n"
-                );
+                    });
+                    // Generating The Method
+                    stringBuilder.append("\r\n");
+
+                    // Code snippet to generate the negative test cases.
+                    if (isNegativeTestCaseRequired) {
+                        if (CollectionUtils.hasElements(reqBodyMap)){
+                            reqBodyMap.entrySet().stream().forEach(data -> {
+                                StringBuilder remainingBodyData = new StringBuilder();
+                                remainingBodyData.append("    Map<String, Object> reqBody = new HashMap<>();\r\n");
+                                reqBodyMap.entrySet().stream().forEach(reqData -> {
+                                    if (!reqData.getKey().equals(data.getKey())) {
+                                        remainingBodyData.append("   reqBody.put(" + '"' + reqData.getKey() + '"' + ", " + '"' + reqData.getValue() + '"' + ");\r\n");
+                                    }
+                                });
+                                stringBuilder.append(
+                                        "@Test(groups=" + '"' + groupName + '"' + ", description="+'"'+groupName+"_Required_"+data.getKey()+'"'+")\r\n" +
+                                                "  public void " + operationData.getOperationId() + "_Required_" + data.getKey() + "(){\r\n" +
+                                                "   String url = " + '"' + baseUrl + '"' + ";\r\n" +
+                                                headerMapData.toString() +
+                                                "   headerMap.put(" + '"' + "Content-Type" + '"' + "," + '"' + (null != operationData.getConsumes() ? operationData.getConsumes().get(0) : "application/json") + '"' + ");\r\n" +
+                                                // looping the remaining data from required map
+                                                remainingBodyData.toString() +
+                                                // Setting the Path Param Object and data . This will be constructed from call in #BaseTestClass
+                                                pathParamData.toString()+
+                                                // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
+                                                queryParamData.toString()+
+                                                "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                                                "   int resStatusCode = response.getStatusCode();\r\n" +
+                                                "   ResponseBody  responseBody = response.getBody();\r\n" +
+                                                "   Headers headers = response.getHeaders();\r\n" +
+                                                "   Assert.assertEquals(resStatusCode, 200);\r\n" +
+                                                "}\r\n"
+                                );
+                            });
+
+                            // Generating the success case with all the mandatory data
+                            StringBuilder remainingBodyData = new StringBuilder();
+                            remainingBodyData.append("    Map<String, Object> reqBody = new HashMap<>();\r\n");
+                            reqBodyMap.entrySet().stream().forEach(data -> {
+                                remainingBodyData.append("   reqBody.put(" + '"' + data.getKey() + '"' + ", " + '"' + data.getValue() + '"' + ");\r\n");
+                            });
+                            stringBuilder.append(
+                                    "@Test(groups=" + '"' + groupName + '"' + ", description="+'"'+groupName+"_SUCCESS"+'"'+")\r\n" +
+                                            "  public void " + operationData.getOperationId() + "_Success" + "(){\r\n" +
+                                            "   String url = " + '"' + baseUrl + '"' + ";\r\n" +
+                                            headerMapData.toString() +
+                                            "    headerMap.put(" + '"' + "Content-Type" + '"' + "," + '"' + (null != operationData.getConsumes() ? operationData.getConsumes().get(0) : "application/json") + '"' + ");\r\n" +
+                                            // looping the remaining data from required map
+                                            remainingBodyData.toString() +
+                                            // Setting the Path Param Object and data . This will be constructed from call in #BaseTestClass
+                                            pathParamData.toString()+
+                                            // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
+                                            queryParamData.toString()+
+                                            "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                                            "   int resStatusCode = response.getStatusCode();\r\n" +
+                                            "   ResponseBody  responseBody = response.getBody();\r\n" +
+                                            "   Headers headers = response.getHeaders();\r\n" +
+                                            "   Assert.assertEquals(resStatusCode, 200);\r\n" +
+                                            "}\r\n"
+                            );
+
+
+                    }else{
+                            constructTestMethod(baseUrl, groupName, operationData, headerMapData, reqMapData, pathParamData, stringBuilder, queryParamData);
+                        }
+                    } else{
+                        constructTestMethod(baseUrl, groupName, operationData, headerMapData, reqMapData, pathParamData, stringBuilder, queryParamData);
+                    }
 
 
 //            }// end tag if
@@ -273,7 +337,14 @@ public class AutoCodeGenUtil {
             }
             int firstTestIndex = stringBuffer.toString().indexOf("@Test");
             int lastBracket = stringBuffer.toString().lastIndexOf("}");
-            String trimData = stringBuffer.toString().substring(firstTestIndex,lastBracket);
+            String trimData = "";
+            // If the file created without any "Test Cases", this firstTestIndex value will be coming as Minus value. So adding
+            // Below Condition to handle such scenarios
+            if(firstTestIndex >= 1)
+                trimData = stringBuffer.toString().substring(firstTestIndex,lastBracket);
+            else
+                trimData = stringBuffer.toString();
+
             stringBuilder.append(trimData);
         }
         stringBuilder.append("\r\n } \r\n");
@@ -282,6 +353,31 @@ public class AutoCodeGenUtil {
         Integer sysCount = testCasesPreparedList.get(className);
         if(sysCount <2)
             printData(">> End Generating Test Case for >>" + className);
+    }
+
+    /**
+     * This method will be used to construct the Test Method with the given signature. The same will be used to construct the
+     * Method and will be placed in the respective classes.
+     * */
+    private static void constructTestMethod(String baseUrl, String groupName, Operation operationData, StringBuffer headerMapData, StringBuffer reqMapData, StringBuffer pathParamData, StringBuilder stringBuilder, StringBuffer queryParamData) {
+        stringBuilder.append(
+                "@Test(groups=" + '"' + groupName + '"' + ", description="+'"'+groupName+operationData.getOperationId()+'"'+")\r\n"+
+                "  public void " + operationData.getOperationId() + "(){\r\n" +
+                        "   String url = " + '"' + baseUrl + '"' + ";\r\n" +
+                        headerMapData.toString() +
+                        "   headerMap.put(" + '"' + "Content-Type" + '"' + "," + '"' + (null != operationData.getConsumes() ? operationData.getConsumes().get(0) : "application/json") + '"' + ");\r\n" +
+                        reqMapData.toString() +
+                        // Setting the Path Param Object and data . This will be constructed from call in #BaseTestClass
+                        pathParamData.toString()+
+                        // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
+                        queryParamData.toString()+
+                        "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                        "   int resStatusCode = response.getStatusCode();\r\n" +
+                        "   ResponseBody  responseBody = response.getBody();\r\n" +
+                        "   Headers headers = response.getHeaders();\r\n" +
+                        "   Assert.assertEquals(resStatusCode, 200);\r\n" +
+                        "}\r\n"
+        );
     }
 
     private static StringBuffer setReqData(String key, Properties properties, StringBuffer buffer, Map<String, Definitions> definitions){

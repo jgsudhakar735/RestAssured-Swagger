@@ -1,20 +1,11 @@
 package com.jgsudhakar.restassured;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
-import com.google.gson.Gson;
 import com.jgsudhakar.restassured.pojo.AutoMationDto;
 import com.jgsudhakar.restassured.pojo.Definitions;
 import com.jgsudhakar.restassured.pojo.Operation;
-import com.jgsudhakar.restassured.pojo.Properties;
-import com.jgsudhakar.restassured.pojo.Response;
 import com.jgsudhakar.restassured.utils.AutoCodeGenUtil;
 import com.jgsudhakar.restassured.utils.RestAssuredConstants;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +19,7 @@ public class AutoMationCodeGen {
 
 	public static void main(String[] args) {
 
-		AutoCodeGenUtil.reInitilize();
+		AutoCodeGenUtil.reInitialize();
 
 		String swaggerPath =  "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\api-docs.json";
 
@@ -63,16 +54,14 @@ public class AutoMationCodeGen {
 						}
 					});
 				}else {
-//				if(entry.getKey().startsWith("/api/language/")) {
 					String urlData = url + entry.getKey();
 					AutoCodeGenUtil.generateAutomationScript(entry.getKey().replaceAll("/", "").toUpperCase(), operations, definitions, urlData, codeGenPath);
-//				}
 			}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
-
+        AutoCodeGenUtil.printData("");
 		AutoCodeGenUtil.printData("Automation Code Generation Completed :) Happy Testing");
 	}
 }
