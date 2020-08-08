@@ -71,7 +71,7 @@ Every software development group tests its products, yet delivered software alwa
 In the consideration of the same, As most of the companies are moving towards microservices, and also putting lots of the efforts to 
 create a descriptive and easy understandable Swagger Document.
 
-This project will <b>Generate Rest Assured Test Cases </b> from the swagger json file. 
+This project will <b>Generate Rest Assured Test Cases </b> from the <i><b>swagger json</b></i> file. 
 
 # What are all covered?
 1. This Project will be Generate the Rest Assured Java Code from the Swagger JSon file.
@@ -79,4 +79,14 @@ This project will <b>Generate Rest Assured Test Cases </b> from the swagger json
 3. Used Extent Report for Reporting purpose.
 4. Listners added to capture the Report Data.
 5. Request, Response, Query , Path Parameters, and  URL will be added to the Report Module based on teh consiguration.
-6. Native Test Cases covered based on the required fields from the Swagger data. 
+6. Native Test Cases covered based on the required fields from the Swagger data.
+
+# How to use this?
+1. Download/ fork project.
+2. Import the project to your favourite Development IDE (STS/Eclipse/Intellij IDEA) or on your choice.
+3. Read the <b><i>constant.properties</i></b>. Change the consiguration according to your use case.
+4. Open the <b><i>AutoMationCodeGen</i></b> java class and RUN after placing the Swagger Json in the class path.
+
+# Configuration
+1. To Configure the specific module to generate the code . Need to add the config of API Path (Ex: /api/student)
+https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/moduleidconfig.PNG
