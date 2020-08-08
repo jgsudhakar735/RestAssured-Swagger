@@ -89,5 +89,5 @@ This project will <b>Generate Rest Assured Test Cases </b> from the <i><b>swagge
 
 # Configuration
 1. To Configure the specific module to generate the code . Need to add the config of API Path (Ex: /api/student)
-![img] (https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/moduleidconfig.PNG)
+<img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/moduleidconfig.PNG">
 
