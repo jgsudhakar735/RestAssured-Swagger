@@ -1,19 +1,20 @@
 package com.jgsudhakar.restassured.junit;
-import com.jgsudhakar.restassured.reports.ExtentReporterNG;
-import io.restassured.http.Headers;
-import io.restassured.response.ResponseBody;
 import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.jgsudhakar.restassured.reports.BaseTestCaseListner;
+
 import io.restassured.RestAssured;
+import io.restassured.http.Headers;
 import io.restassured.http.Method;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 import io.restassured.specification.RequestSpecification;
 
-@Listeners(ExtentReporterNG.class)
+@Listeners(BaseTestCaseListner.class)
 public class TestMain {
 
 	@Test(groups = {"Test"}, testName = "RestData",description = "Sample Name")

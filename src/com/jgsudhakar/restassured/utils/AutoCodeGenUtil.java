@@ -1,10 +1,5 @@
 package com.jgsudhakar.restassured.utils;
 
-import com.google.gson.Gson;
-import com.jgsudhakar.restassured.pojo.*;
-import org.testng.Assert;
-import org.testng.collections.CollectionUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,6 +12,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.testng.Assert;
+import org.testng.collections.CollectionUtils;
+
+import com.google.gson.Gson;
+import com.jgsudhakar.restassured.pojo.AutoMationDto;
+import com.jgsudhakar.restassured.pojo.Definitions;
+import com.jgsudhakar.restassured.pojo.Operation;
+import com.jgsudhakar.restassured.pojo.Properties;
+import com.jgsudhakar.restassured.pojo.Response;
+
 /**
  * @Author : Sudhakar Tangellapalli
  * @File : com.jgsudhakar.restassured.utils.AutoCodeGenUtil
@@ -25,7 +32,8 @@ import java.util.stream.Stream;
 public class AutoCodeGenUtil {
 
     private static Map<String,Integer> testCasesPreparedList = new HashMap<String,Integer>();
-
+    public static final char[] alphabetLower ={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    public static StringBuilder sb = new StringBuilder(64);
     /**
      * This method will be used to delete the all the files exists in the root path of generating folder.
      * */
@@ -74,7 +82,9 @@ public class AutoCodeGenUtil {
         printData("Code Generating for Automation");
         printData("##############################");
         printData("");
-        String codePath = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\com\\jgsudhakar\\restassured\\junit\\generated\\";
+//        String codePath = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\com\\jgsudhakar\\restassured\\junit\\generated\\";
+        String packageNameToPlaceFiles = RestAssuredConstants.packageNameToPlaceFiles;
+        String codePath = RestAssuredConstants.projectLocation+packageNameToPlaceFiles.replace('.','/')+"\\junit\\generated\\";
 
         // Deleting Existing classed
         printData("Deleting old files");
@@ -93,7 +103,8 @@ public class AutoCodeGenUtil {
      * */
     public static AutoMationDto getAutomationObjectFromSwagger(String path) {
         if(null == path || path.equalsIgnoreCase(""))
-            path = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\api-docs.json";
+            path = RestAssuredConstants.projectLocation+"\\api-docs.json";
+        
         StringBuilder swaggerJsonDataBuilder = new StringBuilder();
 
         System.out.println(" Reading the Swagger Json Data from : "+path);
@@ -104,7 +115,6 @@ public class AutoCodeGenUtil {
                 swaggerJsonDataBuilder.append(data);
             });
         } catch (IOException e) {
-            e.printStackTrace();
             Assert.assertNotNull(null,"Failed while reading the Swagger JSon. Please do validate the Swagger JSon.");
         }
         AutoMationDto data = new Gson().fromJson(swaggerJsonDataBuilder.toString(), AutoMationDto.class);
@@ -117,7 +127,7 @@ public class AutoCodeGenUtil {
      * This method will be used to Create Java Class for Each API tag
      */
     public static void generateAutomationScript(String tagName, List<Operation> operations, Map<String, Definitions> definitions, String baseUrl, String path) throws IOException {
-
+        sb.append(alphabetLower);
         // Checking whether to generate the Negative test cases or not
         String nagativeTestCaseGenerate = (String) RestAssuredConstants.getMiscValue("nagativeTestCaseGenerate");
         boolean isNegativeTestCaseRequired = (null != nagativeTestCaseGenerate && !"".equalsIgnoreCase(nagativeTestCaseGenerate.trim()) && nagativeTestCaseGenerate.equalsIgnoreCase("Y"))? true : false;
@@ -137,28 +147,27 @@ public class AutoCodeGenUtil {
             testCasesPreparedList.put(className,(alreadyMappedCount+1));
         }
         stringBuilder.append(" " +
-                "package com.jgsudhakar.restassured.junit.generated;\n" +
+                "package "+RestAssuredConstants.packageNameToPlaceFiles+".junit.generated;\n" +
                 "import org.json.simple.JSONObject;\n" +
                 "import org.json.simple.JSONArray;\n" +
                 "import org.testng.Assert;\n" +
                 "import org.testng.annotations.Test;\n" +
-                "import com.jgsudhakar.restassured.junit.BaseTestClass;\n" +
-                "import io.restassured.response.Response;\n" +
+                "import "+RestAssuredConstants.packageNameToPlaceFiles+".junit.BaseTestClass;\n" +
                 "import java.util.HashMap;\n" +
                 "import java.util.Map;\n" +
                 "import io.restassured.response.Response;\n" +
                 "import io.restassured.http.Headers;\n" +
                 "import io.restassured.response.ResponseBody;\r\n" +
                 "import org.testng.annotations.Listeners;\r\n" +
-                "import com.jgsudhakar.restassured.reports.ExtentReporterNG;" +
+                "import "+RestAssuredConstants.packageNameToPlaceFiles+".reports.BaseTestCaseListner;" +
                 "\n\n");
-        stringBuilder.append("@Listeners(value = ExtentReporterNG.class)\r\n" +
+        stringBuilder.append("@Listeners(value = BaseTestCaseListner.class)\r\n" +
                 "public class " + className).append(" extends BaseTestClass { \r\n");
         stringBuilder.append("\r\n");
         operations.forEach(operationData -> {
-//            if(operationData.getTags().contains("Language Collection")) {
                     Map<String, Object> reqBody = new HashMap<>();
                     Map<String, Object> reqBodyMap = new HashMap<>();
+                    Map<String, Object> notReqBodyMap = new HashMap<>();
                     StringBuffer headerMapData = new StringBuffer();
                     StringBuffer reqMapData = new StringBuffer();
                     StringBuffer pathParamData = new StringBuffer();
@@ -176,7 +185,7 @@ public class AutoCodeGenUtil {
                             pathParamData.append("   pathParam.put(" + '"' + parameter.getName() + '"' + ", " + '"' + pathValue + '"' + ");\r\n");
                         } else if (parameter.getIn().equals("query")) {
                             Object queryValue = RestAssuredConstants.getQueryValue(parameter.getName());
-                            queryParamData.append("   pathParam.put(" + '"' + parameter.getName() + '"' + ", " + '"' + queryValue + '"' + ");\r\n");
+                            queryParamData.append("   queryParam.put(" + '"' + parameter.getName() + '"' + ", " + '"' + queryValue + '"' + ");\r\n");
                         } else if (parameter.getIn().equals("body")) {
                             if (parameter.isRequired()) {
                                 String refName = (null != parameter.getSchema().getOriginalRef() ? parameter.getSchema().getOriginalRef() : parameter.getSchema().getItems().getOriginalRef());
@@ -208,39 +217,35 @@ public class AutoCodeGenUtil {
                                         String type = value.getType();
                                         if (null != type) {
                                             if (type.equals("integer")) {
-                                                //	reqBody.put(key, );
+                                                notReqBodyMap.put(key, bodyValue);
                                                 reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
                                             } else if (type.equals("string")) {
                                                 reqBody.put(key, "");
+                                                notReqBodyMap.put(key, bodyValue);
                                                 reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
+                                            }else if(type.equals("array")){
+                                                Properties property = properties.get(key);
+                                                String objKey = key + RandomStringUtils.random(5, 1, 23, false, false, sb.toString().toCharArray());
+                                                constructArrayOrJsonObjectReq(definitions,type,key,reqMapData,property.getItems().getOriginalRef(),objKey);
+                                                reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + key + ");\r\n");
+                                            }else if(type.equals("object")){
+                                                String objKey = key + RandomStringUtils.random(5, 1, 23, false, false, sb.toString().toCharArray());
+                                                constructArrayOrJsonObjectReq(definitions,type,key,reqMapData,value.getOriginalRef(),objKey);
+                                                reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + objKey + '"' + ");\r\n");
                                             } else {
                                                 reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " + '"' + bodyValue + '"' + ");\r\n");
                                             }
                                         } else {
                                             String objName = value.getOriginalRef();
-                                            Definitions refDef = definitions.get(objName);
-                                            List<String> refDefData = refDef.getRequired();
-                                            Map<String, Properties> propData = refDef.getProperties();
-                                            propData.forEach((k, v) -> {
-//										System.out.println("Key::>"+k);
-//										String typeData = v.getType();
-//										if(null != typeData && typeData.equalsIgnoreCase("object")){
-//											reqMapData.append("   JSONObject "+k+ " = new JSONObject();");
-//											StringBuffer buffer = new StringBuffer();
-//											StringBuffer sBuff = setReqData(k, v, buffer,definitions);
-//											reqMapData.append("   "+sBuff.toString());
-//											reqMapData.append("   reqBody.put(" + '"' + k + '"' + ", " + '"' + k + '"' + ");\r\n");
-//										}else if(null != typeData && typeData.equalsIgnoreCase("array")){
-//											reqMapData.append("   JSONArray  "+k+ " = new JSONArray();");
-//											StringBuffer buffer = new StringBuffer();
-//											StringBuffer sBuff = setReqData(k, v, buffer,definitions);
-//											reqMapData.append("   "+sBuff.toString());
-//											reqMapData.append("   reqBody.put(" + '"' + k + '"' + ", " + k + ");\r\n");
-//										}
-                                            });
+                                            String objKey = objName + RandomStringUtils.random(5, 1, 23, false, false, sb.toString().toCharArray());
+                                            constructArrayOrJsonObjectReq(definitions,"object",key,reqMapData,objName,objKey);
+                                            reqMapData.append("   reqBody.put(" + '"' + key + '"' + ", " +  objKey + ");\r\n");
                                         }
                                     }
                                 });
+                            }else{
+                                // if the parameters is not required , adding those to different map. so that we can add those in the request body directly
+
                             }
                         }
 
@@ -259,6 +264,13 @@ public class AutoCodeGenUtil {
                                         remainingBodyData.append("   reqBody.put(" + '"' + reqData.getKey() + '"' + ", " + '"' + reqData.getValue() + '"' + ");\r\n");
                                     }
                                 });
+
+                                if(CollectionUtils.hasElements(notReqBodyMap)){
+                                    notReqBodyMap.entrySet().stream().forEach(notReqDat->{
+                                        remainingBodyData.append("   reqBody.put(" + '"' + notReqDat.getKey() + '"' + ", " + '"' + notReqDat.getValue() + '"' + ");\r\n");
+                                    });
+                                }
+
                                 stringBuilder.append(
                                         "@Test(groups=" + '"' + groupName + '"' + ", description="+'"'+groupName+"_Required_"+data.getKey()+'"'+")\r\n" +
                                                 "  public void " + operationData.getOperationId() + "_Required_" + data.getKey() + "(){\r\n" +
@@ -271,7 +283,7 @@ public class AutoCodeGenUtil {
                                                 pathParamData.toString()+
                                                 // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
                                                 queryParamData.toString()+
-                                                "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                                                "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam,"+'"'+ operationData.getOperationId() + "_Required_" + data.getKey()+'"' +");\r\n" +
                                                 "   int resStatusCode = response.getStatusCode();\r\n" +
                                                 "   ResponseBody  responseBody = response.getBody();\r\n" +
                                                 "   Headers headers = response.getHeaders();\r\n" +
@@ -286,6 +298,13 @@ public class AutoCodeGenUtil {
                             reqBodyMap.entrySet().stream().forEach(data -> {
                                 remainingBodyData.append("   reqBody.put(" + '"' + data.getKey() + '"' + ", " + '"' + data.getValue() + '"' + ");\r\n");
                             });
+
+                            if(CollectionUtils.hasElements(notReqBodyMap)){
+                                notReqBodyMap.entrySet().stream().forEach(notReqDat->{
+                                    remainingBodyData.append("   reqBody.put(" + '"' + notReqDat.getKey() + '"' + ", " + '"' + notReqDat.getValue() + '"' + ");\r\n");
+                                });
+                            }
+
                             stringBuilder.append(
                                     "@Test(groups=" + '"' + groupName + '"' + ", description="+'"'+groupName+"_SUCCESS"+'"'+")\r\n" +
                                             "  public void " + operationData.getOperationId() + "_Success" + "(){\r\n" +
@@ -298,7 +317,7 @@ public class AutoCodeGenUtil {
                                             pathParamData.toString()+
                                             // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
                                             queryParamData.toString()+
-                                            "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                                            "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam,"+'"'+ operationData.getOperationId() + "_Success"+'"' +");\r\n" +
                                             "   int resStatusCode = response.getStatusCode();\r\n" +
                                             "   ResponseBody  responseBody = response.getBody();\r\n" +
                                             "   Headers headers = response.getHeaders();\r\n" +
@@ -314,9 +333,6 @@ public class AutoCodeGenUtil {
                         constructTestMethod(baseUrl, groupName, operationData, headerMapData, reqMapData, pathParamData, stringBuilder, queryParamData);
                     }
 
-
-//            }// end tag if
-
             // Response Data
             Map<String, Response> responses = operationData.getResponses();
             responses.entrySet().forEach(resData -> {
@@ -329,23 +345,25 @@ public class AutoCodeGenUtil {
         File file = new File(fileNameWithPath);
         if (file.exists()) {
             // reading the file and updating the data in the same content
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String st;
-            StringBuilder stringBuffer = new StringBuilder();
-            while ((st = br.readLine()) != null) {
-                stringBuffer.append(st).append("\r\n");
-            }
-            int firstTestIndex = stringBuffer.toString().indexOf("@Test");
-            int lastBracket = stringBuffer.toString().lastIndexOf("}");
-            String trimData = "";
-            // If the file created without any "Test Cases", this firstTestIndex value will be coming as Minus value. So adding
-            // Below Condition to handle such scenarios
-            if(firstTestIndex >= 1)
-                trimData = stringBuffer.toString().substring(firstTestIndex,lastBracket);
-            else
-                trimData = stringBuffer.toString();
+        	try(BufferedReader br = new BufferedReader(new FileReader(file))){
+        		 String st;
+                 StringBuilder stringBuffer = new StringBuilder();
+                 while ((st = br.readLine()) != null) {
+                     stringBuffer.append(st).append("\r\n");
+                 }
+                 int firstTestIndex = stringBuffer.toString().indexOf("@Test");
+                 int lastBracket = stringBuffer.toString().lastIndexOf("}");
+                 String trimData = "";
+                 // If the file created without any "Test Cases", this firstTestIndex value will be coming as Minus value. So adding
+                 // Below Condition to handle such scenarios
+                 if(firstTestIndex >= 1)
+                     trimData = stringBuffer.toString().substring(firstTestIndex,lastBracket);
+                 else
+                     trimData = stringBuffer.toString();
 
-            stringBuilder.append(trimData);
+                 stringBuilder.append(trimData);
+                 br.close();
+        	}
         }
         stringBuilder.append("\r\n } \r\n");
         // writing to the file
@@ -371,7 +389,7 @@ public class AutoCodeGenUtil {
                         pathParamData.toString()+
                         // Setting the Query Param Object and data . This will be constructed from call in #BaseTestClass
                         queryParamData.toString()+
-                        "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam);\r\n" +
+                        "   Response response = " + operationData.getOperationType() + "(reqBody,headerMap,url,pathParam,queryParam,"+'"'+operationData.getOperationId()+'"'+");\r\n" +
                         "   int resStatusCode = response.getStatusCode();\r\n" +
                         "   ResponseBody  responseBody = response.getBody();\r\n" +
                         "   Headers headers = response.getHeaders();\r\n" +
@@ -380,40 +398,48 @@ public class AutoCodeGenUtil {
         );
     }
 
-    private static StringBuffer setReqData(String key, Properties properties, StringBuffer buffer, Map<String, Definitions> definitions){
-//		buffer.append("\r\n   JSONObject "+key+" = new JSONObject();");
-        String type = properties.getType();
-        if(null != type && type.equals("array")){
-            buffer.append("   JSONArray  "+key + " = new JSONArray();");
-            String originalRef = properties.getOriginalRef();
-            Definitions def = definitions.get(originalRef);
-            List<String> reqParams = def.getRequired();
-            Map<String, Properties> paramMap = def.getProperties();
-            paramMap.entrySet().forEach(props -> {
-                System.out.println(props.getKey() + ":::");
-                Properties value = props.getValue();
-                String ty = value.getType();
-                if(null != ty && ty.equalsIgnoreCase("object")){
-                    setReqData(props.getKey(),value,buffer,definitions);
-                }else if(null != ty && ty.equalsIgnoreCase("array")){
+    /**
+     * This method wil be used to construct the request object which again contains the Object or Array of Object. This case we may need to
+     * iterate and set the data to the request object.
+     * Here we are handling the such cases.
+     * */
+    private static void constructArrayOrJsonObjectReq(Map<String, Definitions> definitions,String type,String key, StringBuffer reqMapData, String currentDefinitionKey, String objName){
+        if(null != type && type.equals("array")) {
+            reqMapData.append("   JSONArray ").append(key).append(" = ").append(" new JSONArray();\r\n");
+            Definitions def = definitions.get(currentDefinitionKey);
+            if(null != objName)
+            	reqMapData.append("   JSONObject ").append(objName).append(" = ").append(" new JSONObject();\r\n");
 
-                }else{
+            // handling null case, where as in some cases list contains directly String or integer or long
+            if(null != def){
+                Map<String, Properties> properties = def.getProperties();
+                properties.entrySet().forEach(defProp -> {
+                    Properties value = defProp.getValue();
+                    String typ = value.getType();
+                    if(null != typ ){
+                        if(typ.equals("integer") || typ.equals("string")) {
+                            String objKey = StringUtils.defaultString(objName,"obj");
+                            reqMapData.append("   " + objKey + ".put(").append('"').append(defProp.getKey()).append('"').append(" , ").append('"').append("").append('"').append(");").append("\r\n");
+                        }else if(typ.equals("array")){
+                            constructArrayOrJsonObjectReq(definitions,typ,defProp.getKey(),reqMapData,value.getOriginalRef(),null);
+                        }
+                    }else {
+                        String objKey = value.getOriginalRef() + RandomStringUtils.random(5, 1, 23, false, false, sb.toString().toCharArray());
+                        constructArrayOrJsonObjectReq(definitions,"object",defProp.getKey(),reqMapData,value.getOriginalRef(),objKey);
+                        reqMapData.append("   "+objName+".put(").append('"').append(defProp.getKey()).append('"').append(" , ").append(objKey).append(");").append("\r\n");
+                    }
+                });
+                reqMapData.append("   "+key+".add("+objName+")").append(";").append("\r\n");
+            }
+        }else if(null != type && type.equals("object")){
 
-                }
+            // randomize the key , so that if the same object is used in different place in the the same request this will not create conflict while obj creation
+            reqMapData.append("   JSONObject ").append(objName).append(" = ").append(" new JSONObject();\r\n");
+            Definitions def = definitions.get(currentDefinitionKey);
+            Map<String, Properties> properties = def.getProperties();
+            properties.entrySet().forEach(defProp -> {
+                reqMapData.append("   "+objName+".put(").append('"').append(defProp.getKey()).append('"').append(" , ").append('"').append("").append('"').append(");").append("\r\n");
             });
-
-        }else if(null != type && type.equalsIgnoreCase("object")){
-            String originalRef = properties.getOriginalRef();
-            Definitions def = definitions.get(originalRef);
-            List<String> reqParams = def.getRequired();
-            Map<String, Properties> paramMap = def.getProperties();
-            paramMap.entrySet().forEach(defProp -> {
-                System.out.println(defProp.getKey() + ":::"+defProp.getValue());
-                buffer.append("   "+'"'+defProp.getKey() +'"'+ "," + '"'+defProp.getValue()+'"'+";");
-            });
-        }else {
-
         }
-        return buffer;
     }
 }

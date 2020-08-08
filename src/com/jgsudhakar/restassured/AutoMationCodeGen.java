@@ -21,14 +21,14 @@ public class AutoMationCodeGen {
 
 		AutoCodeGenUtil.reInitialize();
 
-		String swaggerPath =  "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\api-docs.json";
+		String swaggerPath =  RestAssuredConstants.projectLocation+"\\api-docs-dev.json";
 
 		AutoMationDto data = AutoCodeGenUtil.getAutomationObjectFromSwagger(swaggerPath);
 
 		String url ="http://"+data.getHost()+data.getBasePath();
-
-		String codeGenPath = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\com\\jgsudhakar\\restassured\\junit\\generated\\";
-
+		String packageNameToPlaceFiles = RestAssuredConstants.packageNameToPlaceFiles;
+		String codeGenPath = RestAssuredConstants.projectLocation+packageNameToPlaceFiles.replace('.', '/')+"\\junit\\generated\\";
+System.out.println(codeGenPath);
 		// checking is there any configuration specific for module code generation
 		String moduleId = (String)RestAssuredConstants.getMiscValue("ModuleId");
 

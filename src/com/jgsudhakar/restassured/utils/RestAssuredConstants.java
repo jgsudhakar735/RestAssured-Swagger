@@ -1,8 +1,5 @@
 package com.jgsudhakar.restassured.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -14,9 +11,19 @@ import java.util.Properties;
  * @File : com.jgsudhakar.restassured.utils.RestAssuredConstants
  * @Date : 15/07/2020
  */
-public class RestAssuredConstants {
-    public static String REST_ASSURED_URL;
+public final class RestAssuredConstants implements Cloneable{
+	
+	/**
+	 * Adding private Constructor not to allow to create an object
+	 */
+	private RestAssuredConstants() {
+		
+	}
+	
+	public static String packageNameToPlaceFiles = "com.jgsudhakar.restassured";
 
+	public static String projectLocation = "D:\\sudhakar\\softwares\\SpringSTS\\sts-4.1.0.RELEASE\\MxAdminNew\\MxAdminAM\\src\\";
+	
     /**
      * This map initially read the data from the properties file and set in the header parameter map.
      * Those Keys which maps with "H:" will be stored in this map.
@@ -75,9 +82,9 @@ public class RestAssuredConstants {
 
             });
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.err.println(ex.getMessage());
         }catch (Exception e){
-            e.printStackTrace();
+        	System.err.println(e.getMessage());
         }
     }
 
@@ -126,7 +133,7 @@ public class RestAssuredConstants {
     }
 
     /**
-     * This method will return the Misc map data which is set in the constant file. to retrieve this you need to miscellanies  the header key to get the value if
+     * This method will return the Misc map data which is set in the constant file. to retrieve this you need to miscellaneous  the header key to get the value if
      * you need to customize the data from misc parameter
      * */
     public static Object getMiscValue(String key) {
@@ -134,6 +141,11 @@ public class RestAssuredConstants {
         if(null == object)
             return "";
         return object;
-        }
+    }
+    
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+    	throw new CloneNotSupportedException("CLONE_NOT_SUPPORTED");
+    }
 
 }

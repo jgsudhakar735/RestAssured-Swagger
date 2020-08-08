@@ -10,14 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 /**
  * @Author : Sudhakar Tangellapalli
  * @File : com.jgsudhakar.restassured.pojo.Operation
  * @Date : 15/07/2020
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Operation {
 	
 	private Map<String, Object> vendorExtensions = new LinkedHashMap<>();
