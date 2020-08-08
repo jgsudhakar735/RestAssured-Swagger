@@ -1,7 +1,7 @@
 # RestAssured-Swagger
 This project is used to generate the Automation script for Rest Assured framework from Swagger Json
 
-Jar file added.
+<!-- Jar file added.
 
 activation-1.1.jar
 animal-sniffer-annotations-1.17.jar
@@ -63,4 +63,20 @@ slf4j-ext-1.7.30.jar
 swagger-models-1.6.1.jar
 tagsoup-1.2.1.jar
 uri-template-0.9.jar
-validation-api-1.1.0.Final.jar
+validation-api-1.1.0.Final.jar -->
+
+# What is the purpose of this project?
+Every software development group tests its products, yet delivered software always has defects. Test engineers strive to catch them before the product is released but they always creep in and they often reappear, even with the best manual testing processes. Test Automation software is the best way to increase the effectiveness, efficiency and coverage of your software testing.
+
+In the consideration of the same, As most of the companies are moving towards microservices, and also putting lots of the efforts to 
+create a descriptive and easy understandable Swagger Document.
+
+This project will <b>Generate Rest Assured Test Cases </b> from the swagger json file. 
+
+# What are all covered?
+1. This Project will be Generate the Rest Assured Java Code from the Swagger JSon file.
+2. We can generate specific api / module Test cases.
+3. Used Extent Report for Reporting purpose.
+4. Listners added to capture the Report Data.
+5. Request, Response, Query , Path Parameters, and  URL will be added to the Report Module based on teh consiguration.
+6. Native Test Cases covered based on the required fields from the Swagger data. 
