@@ -90,4 +90,7 @@ This project will <b>Generate Rest Assured Test Cases </b> from the <i><b>swagge
 # Configuration
 1. To Configure the specific module to generate the code . Need to add the config of API Path (Ex: /api/student)
 <img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/moduleidconfig.PNG">
-
+2. To generate Negative Test Case from the swagger Enable the below flag . 
+<img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/NegatieveTestConfig.PNG">
+3. To Audit the Request, Response, Query , Path Parameters, and  URL will be added to the Report Module , do enable the below configuration.
+<img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/logAuditConfig.PNG">
