@@ -94,3 +94,9 @@ This project will <b>Generate Rest Assured Test Cases </b> from the <i><b>swagge
 <img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/NegatieveTestConfig.PNG">
 3. To Audit the Request, Response, Query , Path Parameters, and  URL will be added to the Report Module , do enable the below configuration.
 <img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/logAuditConfig.PNG">
+
+# How Does Report looks like?
+1. For reporting purpose we have used Extent Report(https://extentreports.com/).
+2. In this project, we have used 4.0.6 library.
+<img src="https://github.com/jgsudhakar735/RestAssured-Swagger/blob/master/docs/ReportGenerated.PNG">
+3. For any customization / better reporting purpose please do check in the <b>Extent Reports</b>
